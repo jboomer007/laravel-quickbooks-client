@@ -20,6 +20,14 @@ class Client
      */
     protected $configs;
 
+    
+    /**
+     * The tenant for the DataService
+     *
+     * @var array
+     */
+    protected $tenant;
+
     /**
      * The DataService instance
      *
@@ -65,6 +73,14 @@ class Client
     }
 
     /**
+     * Set the tenant for the Data service
+     */
+    public function setTenant($tenant){
+
+		$this->tenant = $tenant;
+	}
+    
+    /**
      * Configure the logging per config/quickbooks.php
      */
     public function configureLogging(): DataService
@@ -93,6 +109,11 @@ class Client
      */
     public function deleteToken(): self
     {
+        try{
+		    $this->getDataService()->getOAuth2LoginHelper()->revokeToken($this->token->refresh_token);
+	    }catch(Exception $e){
+	
+	    }
         $this->setToken($this->token->remove());
 
         return $this;
@@ -239,8 +260,9 @@ class Client
             'baseUrl' => $this->configs['data_service']['base_url'],
             'ClientID' => $this->configs['data_service']['client_id'],
             'ClientSecret' => $this->configs['data_service']['client_secret'],
-            'RedirectURI' => route('quickbooks.token'),
+            'RedirectURI'  => 'https://synchouse.io/quickbooks-online/token',
             'scope' => $this->configs['data_service']['scope'],
+            'state'	=> json_encode(['tenant'=>$this->tenant]),
         ];
     }
 
@@ -254,6 +276,20 @@ class Client
         // The DataService is tied to a specific token, so remove it when using a new one
         unset($this->data_service);
 
+        return $this;
+    }
+
+    /**
+     * revokes a token"
+     */
+     public function revokeToken(Token $token)
+     {
+
+	    $this->getDataService()->getOAuth2LoginHelper()->revokeToken($token);
+        $this->token = $token;
+
+        // The DataService is tied to a specific token, so remove it when using a new one
+        unset($this->data_service);
         return $this;
     }
 }

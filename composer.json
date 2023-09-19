@@ -16,11 +16,6 @@
   ],
   "require": {
     "php": "^8.0.2",
-    "illuminate/database": "^9.19",
-    "illuminate/http": "^9.19",
-    "illuminate/routing": "^9.19",
-    "illuminate/support": "^9.19",
-    "nesbot/carbon": "^2.62.1",
     "quickbooks/v3-php-sdk": "^5.4.6"
   },
   "require-dev": {

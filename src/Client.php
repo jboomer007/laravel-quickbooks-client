@@ -109,11 +109,49 @@ class Client
      */
     public function deleteToken(): self
     {
-        try{
-		    $this->getDataService()->getOAuth2LoginHelper()->revokeToken($this->token->refresh_token);
-	    }catch(Exception $e){
-	
-	    }
+        
+        // Associative array to use to filter out only the needed config keys when using existing token
+        $existing_keys = [
+            'auth_mode'    => null,
+            'baseUrl'      => null,
+            'ClientID'     => null,
+            'ClientSecret' => null,
+        ];
+
+        // Have good access & refresh, so allow app to run
+        if ($this->hasValidAccessToken()) {
+            // Pull in the configs from the token into needed keys from the configs
+            $data_service = DataService::Configure(
+                array_merge(
+                    array_intersect_key($this->parseDataConfigs(), $existing_keys),
+                    [
+                        'accessTokenKey'  => $this->token->access_token,
+                        'QBORealmID'      => $this->token->realm_id,
+                        'refreshTokenKey' => $this->token->refresh_token,
+                    ]
+                )
+            );
+        }
+
+        // Pull in the configs from the token into needed keys from the configs
+        $data_service = DataService::Configure(
+            array_merge(
+                array_intersect_key($this->parseDataConfigs(), $existing_keys),
+                [
+                    'QBORealmID'      => $this->token->realm_id,
+                    'refreshTokenKey' => $this->token->refresh_token,
+                ]
+            )
+        );
+
+        $revoke_token = $data_service->getOAuth2LoginHelper()
+            ->revokeToken($this->token->access_token);
+
+        //try{
+		//    $this->getDataService()->getOAuth2LoginHelper()->revokeToken($this->token->refresh_token);
+	    //}catch(Exception $e){
+	    //}
+        
         $this->setToken($this->token->remove());
 
         return $this;

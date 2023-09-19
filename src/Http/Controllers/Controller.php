@@ -38,6 +38,7 @@ class Controller extends LaravelController
                 ->make('quickbooks::disconnect')
                 ->with('company', $quickbooks->getDataService()->getCompanyInfo());
         }
+        $quickbooks->setTenant(tenant()->domains()->first()->domain);
 
         // Give view to link account
         return $view_factory
@@ -79,9 +80,10 @@ class Controller extends LaravelController
     ): RedirectResponse {
         // TODO: Deal with exceptions
         $quickbooks->exchangeCodeForToken($request->get('code'), $request->get('realmId'));
+        
+        $request->session()->flash('success', 'Connected to QuickBooks Online');
 
-        $request->session()->flash('success', 'Connected to QuickBooks');
+	    return redirect('/quickbooks-online/settings');
 
-        return $redirector->intended($url_generator->route('quickbooks.connect'));
     }
 }

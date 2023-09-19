@@ -34,7 +34,7 @@ class Filter
             // Set intended route, so that after linking account, user is put where they were going
             $this->session->put('url.intended', $this->url_generator->to($request->path()));
 
-            return $this->redirector->route('quickbooks.connect');
+            return $this->redirector->route('tenant.qbo.settings')->with('error','Please Connect to QuickBooks Online');
         }
 
         return $next($request);
